@@ -678,8 +678,7 @@
           var fn = p.fn || '';
           var ln = (p.ln || '').toUpperCase();
           var num = p.num ? '#' + p.num : '';
-          var initial = fn ? fn.charAt(0).toUpperCase() + '.' : '';
-          var tag = [num, initial, ln].filter(Boolean).join(' ');
+          var tag = [num, fn, ln].filter(Boolean).join(' ');
 
           var frame = document.createElement('div');
           frame.className = 'player-frame';
