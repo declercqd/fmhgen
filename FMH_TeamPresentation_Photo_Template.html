@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>FMH — Présentation Équipe</title>
+<title>FMH — Équipe avec Photo</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
@@ -35,14 +35,23 @@ body { padding-top: 44px !important; }
 
 /* player editor */
 .player-col-headers{
-  display:grid;grid-template-columns:30px 50px 1fr 68px 20px;
+  display:grid;grid-template-columns:30px 50px 1fr 68px 28px 20px;
   gap:3px;font-size:9px;color:rgba(255,255,255,.3);
   text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;padding:0 2px
 }
 .player-edit-row{
-  display:grid;grid-template-columns:30px 50px 1fr 68px 20px;
+  display:grid;grid-template-columns:30px 50px 1fr 68px 28px 20px;
   gap:3px;margin-bottom:3px;align-items:center
 }
+.btn-photo{
+  background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);
+  color:rgba(255,255,255,.6);cursor:pointer;font-size:13px;
+  padding:0;border-radius:4px;line-height:1;
+  width:28px;height:26px;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0
+}
+.btn-photo:hover{background:rgba(255,255,255,.18);color:#fff}
+.btn-photo.has-photo{background:rgba(0,180,80,.25);border-color:rgba(0,200,80,.4);color:#6f6}
 .player-edit-row input{
   background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);
   border-radius:4px;color:#fff;padding:4px 5px;font-size:11px;width:100%;outline:none
@@ -139,22 +148,40 @@ body { padding-top: 44px !important; }
 .c-col:last-child{padding-left:16px}
 
 .c-player{
-  flex:1;display:flex;align-items:center;gap:14px;
-  padding:0 10px;
+  flex:1;display:flex;align-items:stretch;gap:12px;
+  padding:0 10px 0 0;
   border-bottom:1px solid rgba(255,255,255,.05);
-  min-height:0
+  min-height:0;overflow:hidden
 }
 .c-player:last-child{border-bottom:none}
 .c-player:nth-child(odd){background:rgba(255,255,255,.035)}
 
-.c-num{
-  width:56px;height:56px;border-radius:50%;
-  background:var(--red);
-  display:flex;align-items:center;justify-content:center;
-  font-family:'Arial Black',Arial,sans-serif;font-size:22px;font-weight:900;
-  flex-shrink:0;color:#fff
+/* photo container — full row height, ratio GroupCard 326:289 */
+.c-photo{
+  flex-shrink:0;
+  position:relative;
+  aspect-ratio:326/289;
+  align-self:stretch;
+  border-radius:0 4px 4px 0;
+  overflow:hidden;
+  background:rgba(255,255,255,.08)
 }
-.c-pinfo{flex:1;min-width:0}
+.c-photo img{
+  width:100%;height:100%;
+  object-fit:cover;display:block
+}
+/* red corner badge — bottom right */
+.c-photo-num{
+  position:absolute;bottom:0;right:0;
+  background:var(--red);color:#fff;
+  font-family:'Arial Black',Arial,sans-serif;
+  font-size:13px;font-weight:900;
+  padding:3px 6px;
+  border-radius:5px 0 0 0;
+  line-height:1
+}
+
+.c-pinfo{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center;padding:6px 0}
 .c-pname{
   font-size:27px;font-weight:700;
   line-height:1.2;word-break:break-word
@@ -217,7 +244,7 @@ body { padding-top: 44px !important; }
     <div class="panel">
       <div class="panel-title">Joueurs</div>
       <div class="player-col-headers">
-        <span>#</span><span>Poste</span><span>Prénom NOM</span><span>Club</span><span></span>
+        <span>#</span><span>Poste</span><span>Prénom NOM</span><span>Club</span><span>📷</span><span></span>
       </div>
       <div id="player-list"></div>
       <button class="btn btn-secondary" style="margin-top:8px" onclick="addPlayer()">＋ Ajouter un joueur</button>
@@ -309,6 +336,8 @@ function renderControls() {
       '<input type="text" value="' + esc(p.pos)  + '" placeholder="Poste"   oninput="up('+i+',\'pos\',this.value)">' +
       '<input type="text" value="' + esc(p.fn + (p.fn&&p.ln?' ':'')+p.ln) + '" placeholder="Prénom NOM" oninput="upName('+i+',this.value)">' +
       '<input type="text" value="' + esc(p.club) + '" placeholder="Club"    oninput="up('+i+',\'club\',this.value)">' +
+      '<button class="btn-photo' + (p.photo ? ' has-photo' : '') + '" onclick="triggerPhoto('+i+')" title="' + (p.photo ? 'Photo chargée — cliquer pour changer' : 'Ajouter une photo') + '">📷</button>' +
+      '<input type="file" id="photo-input-'+i+'" accept="image/*" style="display:none" onchange="loadPhoto('+i+',this)">' +
       '<button class="btn-del" onclick="delPlayer('+i+')" title="Supprimer"' + (players.length <= MIN_PLAYERS ? ' disabled style="opacity:.2;cursor:not-allowed"' : '') + '>✕</button>';
     list.appendChild(row);
   });
@@ -325,8 +354,22 @@ function upName(i, val){
   syncCard();
 }
 
+function triggerPhoto(i){
+  document.getElementById('photo-input-'+i).click();
+}
+
+function loadPhoto(i, input){
+  var file = input.files[0]; if(!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    players[i].photo = e.target.result;
+    renderControls(); syncCard();
+  };
+  reader.readAsDataURL(file);
+}
+
 function addPlayer(){
-  players.push({num:'', pos:'', fn:'Prénom', ln:'NOM', club:''});
+  players.push({num:'', pos:'', fn:'Prénom', ln:'NOM', club:'', photo:null});
   renderControls(); syncCard();
 }
 
@@ -345,20 +388,24 @@ function syncCard(){
   var half  = Math.ceil(players.length / 2);
   var leftPlayers  = players.slice(0, half);
   var rightPlayers = players.slice(half);
+  // pad right column with empty slots to match left column count
   while(rightPlayers.length < leftPlayers.length) rightPlayers.push(null);
   document.getElementById('col-left').innerHTML  = leftPlayers.map(playerHTML).join('');
   document.getElementById('col-right').innerHTML = rightPlayers.map(function(p){ return p ? playerHTML(p) : emptySlotHTML(); }).join('');
 }
 
 function emptySlotHTML(){
-  return '<div class="c-player" style="opacity:0;pointer-events:none"><div class="c-num"></div><div class="c-pinfo"></div></div>';
+  return '<div class="c-player" style="opacity:0;pointer-events:none"><div class="c-photo"></div><div class="c-pinfo"></div></div>';
 }
 
 function playerHTML(p){
   var num  = p.num  || '—';
   var name = (p.fn ? escTxt(p.fn)+' ' : '') + '<span class="ln">'+escTxt(p.ln||'')+'</span>';
   return '<div class="c-player">' +
-    '<div class="c-num">'+escTxt(num)+'</div>' +
+    '<div class="c-photo"' + (p.photo ? ' data-photo="'+p.photo+'"' : '') + '>' +
+      (p.photo ? '<img src="'+p.photo+'" alt="">' : '') +
+      '<div class="c-photo-num">'+escTxt(num)+'</div>' +
+    '</div>' +
     '<div class="c-pinfo">' +
       '<div class="c-pname">'+name+'</div>' +
       '<div class="c-psub">' +
@@ -423,25 +470,91 @@ function loadCSV(input){
 }
 
 // ── Download ───────────────────────────────────────────────────────────────
-function downloadCard(){
-  var card = document.getElementById('card');
+// ── Canvas helpers ─────────────────────────────────────────────────────────
+function drawCover(ctx, img, x, y, w, h){
+  var iw = img.naturalWidth, ih = img.naturalHeight;
+  if(!iw || !ih) return;
+  var scale = Math.max(w/iw, h/ih);
+  var sw = w/scale, sh = h/scale;
+  var sx = (iw-sw)/2, sy = (ih-sh)/2;
+  ctx.drawImage(img, sx, sy, sw, sh, x, y, w, h);
+}
 
-  var clone = card.cloneNode(true);
-  clone.style.cssText = [
-    'position:fixed','top:-9999px','left:-9999px',
-    'width:1080px','height:1080px','transform:none',
-    'pointer-events:none','z-index:-1','overflow:hidden'
-  ].join(';');
+function exportCanvas(canvas){
+  var name = 'FMH_Equipe_Photo_' + (document.getElementById('inp-comp').value||'carte').replace(/\s+/g,'_') + '.png';
+  var a = document.createElement('a');
+  a.download = name; a.href = canvas.toDataURL('image/png'); a.click();
+}
+
+// ── Step 1 : preload all photos, then render ───────────────────────────────
+function downloadCard(){
+  var photoPromises = players.map(function(p){
+    return new Promise(function(resolve){
+      if(!p.photo){ resolve(null); return; }
+      var img = new Image();
+      img.onload  = function(){ resolve({src: p.photo, img: img}); };
+      img.onerror = function(){ resolve(null); };
+      img.src = p.photo;
+    });
+  });
+  Promise.all(photoPromises).then(function(results){
+    var imgMap = {};
+    results.forEach(function(r){ if(r) imgMap[r.src] = r.img; });
+    _renderCanvas(imgMap);
+  });
+}
+
+// ── Step 2 : clone → html2canvas overlay → final canvas composite ──────────
+function _renderCanvas(imgMap){
+  var W = 1080, H = 1080;
+  var clone = document.getElementById('card').cloneNode(true);
+  clone.style.cssText = 'position:fixed;top:0;left:-2000px;width:'+W+'px;height:'+H+'px;transform:none;pointer-events:none;z-index:-1;overflow:hidden;';
   document.body.appendChild(clone);
 
+  // Collect photo slot positions from the clone (at true 1080px — no scaling math)
+  var cloneRect = clone.getBoundingClientRect();
+  var photoSlots = [];
+  clone.querySelectorAll('.c-photo[data-photo]').forEach(function(el){
+    var src = el.getAttribute('data-photo');
+    var img = imgMap[src];
+    if(!img) return;
+    var r = el.getBoundingClientRect();
+    photoSlots.push({
+      x: Math.round(r.left - cloneRect.left),
+      y: Math.round(r.top  - cloneRect.top),
+      w: Math.round(r.width),
+      h: Math.round(r.height),
+      img: img
+    });
+    var imgEl = el.querySelector('img');
+    if(imgEl) imgEl.style.display = 'none'; // hide — drawn manually below
+  });
+
   html2canvas(clone, {
-    width:1080, height:1080, scale:1,
-    useCORS:true, allowTaint:true, backgroundColor:null
-  }).then(function(canvas){
+    width:W, height:H, scale:1,
+    useCORS:true, allowTaint:true, backgroundColor:null, logging:false
+  }).then(function(overlayCanvas){
     document.body.removeChild(clone);
-    var name = 'FMH_Equipe_' + (document.getElementById('inp-comp').value||'carte').replace(/\s+/g,'_') + '.png';
-    var a = document.createElement('a');
-    a.download = name; a.href = canvas.toDataURL('image/png'); a.click();
+
+    // Final canvas: bg → overlay → photos on top
+    var final = document.createElement('canvas');
+    final.width = W; final.height = H;
+    var ctx = final.getContext('2d');
+
+    ctx.fillStyle = '#060d2a';
+    ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(overlayCanvas, 0, 0, W, H);
+
+    photoSlots.forEach(function(slot){
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(slot.x, slot.y, slot.w, slot.h);
+      ctx.clip();
+      drawCover(ctx, slot.img, slot.x, slot.y, slot.w, slot.h);
+      ctx.restore();
+    });
+
+    exportCanvas(final);
   }).catch(function(err){
     document.body.removeChild(clone);
     alert('Erreur export : ' + err.message);
