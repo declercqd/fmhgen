@@ -1,17 +1,17 @@
 FMH_Joueurs_Modele
-Compétition;Nom de la compétition;;;
-Lieu;Ville;;;
-Dates;JJ-JJ Mois AAAA;;;
-prénom;nom;numéro;poste;Catégorie
-Jean;DUPONT;1;Gardien de But;M45
-Marie;MARTIN;2;Défenseur;M45
-Pierre;BERNARD;3;Défenseur;M45
-Sophie;THOMAS;4;Défenseur;M45
-Louis;PETIT;5;Défenseur;M45
-Claire;ROBERT;6;Milieu;M45
-Paul;RICHARD;7;Milieu;M45
-Emma;SIMON;8;Milieu;M45
-Lucas;LAURENT;9;Avant;M45
-Julie;MICHEL;10;Avant;M45
-Antoine;LEFEBVRE;11;Avant;M45
-Camille;LEROY;12;Avant;M45
+Compétition;Nom de la compétition
+Lieu;Ville
+Dates;JJ-JJ Mois AAAA
+prénom;nom;numéro;poste;Catégorie;Club
+Jean;DUPONT;1;Gardien de But;M45;RC Paris
+Marie;MARTIN;2;Défenseur;M45;Lyon HC
+Pierre;BERNARD;3;Défenseur;M45;Bordeaux HC
+Sophie;THOMAS;4;Défenseur;M45;Nantes HC
+Louis;PETIT;5;Défenseur;M45;Lille HC
+Claire;ROBERT;6;Milieu;M45;Marseille HC
+Paul;RICHARD;7;Milieu;M45;Strasbourg HC
+Emma;SIMON;8;Milieu;M45;Toulouse HC
+Lucas;LAURENT;9;Avant;M45;Nice HC
+Julie;MICHEL;10;Avant;M45;Rennes HC
+Antoine;LEFEBVRE;11;Avant;M45;Montpellier HC
+Camille;LEROY;12;Avant;M45;Grenoble HC
