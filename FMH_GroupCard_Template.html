@@ -920,6 +920,7 @@
         // Layer 4: logos redrawn on top (html2canvas may not render them due to stripped filters)
         const headerImgs = document.querySelectorAll('.card-header > img');
         const fmhImg = headerImgs[0];
+        const HDR_H = 152;
         const logoH = 128, logoY = (HDR_H - logoH) / 2;
         if (fmhImg && fmhImg.complete && fmhImg.naturalWidth > 0) {
           const lw = fmhImg.naturalWidth * (logoH / fmhImg.naturalHeight);
