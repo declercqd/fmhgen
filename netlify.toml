@@ -1,6 +1,1 @@
-[build]
-  publish = "."
-  command = ""
-
-[build.environment]
-  NODE_VERSION = "20"
+# Netlify Identity - no edge functions needed

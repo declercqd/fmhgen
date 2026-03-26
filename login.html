@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FMH — Connexion</title>
+<script src="https://identity.netlify.com/v1/netlify-identity-widget.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#060d2a;color:#fff;font-family:Arial,sans-serif;
+  min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px}
+.logo{font-size:11px;font-weight:bold;letter-spacing:4px;color:rgba(255,255,255,0.3);text-transform:uppercase}
+h1{font-size:22px;font-weight:700;color:#fff}
+p{font-size:13px;color:rgba(255,255,255,0.45);text-align:center}
+.login-btn{
+  background:linear-gradient(135deg,#002395,#1a3fc4);color:#fff;
+  border:none;border-radius:8px;padding:12px 32px;font-size:14px;font-weight:700;
+  cursor:pointer;letter-spacing:.5px;transition:opacity .2s
+}
+.login-btn:hover{opacity:.85}
+</style>
+</head>
+<body>
+<div class="logo">France Masters Hockey</div>
+<h1>Générateur de cartes</h1>
+<p>Connectez-vous pour accéder à l'application</p>
+<button class="login-btn" id="login-btn">Se connecter</button>
+
+<script>
+  var params = new URLSearchParams(window.location.search);
+  var redirect = params.get('redirect') || '/';
+
+  netlifyIdentity.on('init', function(user) {
+    if (user) { window.location.replace(redirect); }
+  });
+
+  netlifyIdentity.on('login', function() {
+    window.location.replace(redirect);
+  });
+
+  document.getElementById('login-btn').onclick = function() {
+    netlifyIdentity.open('login');
+  };
+</script>
+</body>
+</html>
